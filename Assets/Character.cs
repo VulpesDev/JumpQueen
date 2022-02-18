@@ -40,6 +40,8 @@ public class Character : MonoBehaviour
 
         //lookSpeed = SeneManagement.sensitivity;
         //lookSpeedBase = lookSpeed;
+
+        StartCoroutine(CameraShakeCheck());
     }
 
     void Update()
@@ -78,16 +80,20 @@ public class Character : MonoBehaviour
     IEnumerator JumpCheck()
     {
         holding = true;
+        shakeCam = true;
         if (Input.GetButtonUp("Jump"))
         {
             moveDirection.y = jumpSpeed * charge;
             holding = false;
+            shakeCam = false;
             yield return new WaitUntil(() => characterController.isGrounded != true);
             StartCoroutine(PushForwards());
         }
         yield return new WaitForSeconds(0.01f);
-        if(charge < maxCharge)
-        charge += chargeRate;
+        if (charge < maxCharge)
+            charge += chargeRate;
+        if (charge < maxCharge / 3)
+            magnitude += chargeRate / 10;
         if (holding) StartCoroutine(JumpCheck());
     }
 
@@ -103,6 +109,13 @@ public class Character : MonoBehaviour
     }
     IEnumerator Cooldown()
     {
+        while (magnitude > 0.0f)
+        {
+            magnitude -= 0.6f;
+            if (magnitude < 0.0f) magnitude = 0.0f;
+            yield return new WaitForSeconds(0.01f);
+        }
+        
         while (charge > 0.0f)
         {
             charge -= 0.4f;
@@ -117,19 +130,35 @@ public class Character : MonoBehaviour
             moveDirection.y -= gravity * Time.fixedDeltaTime;
             characterController.Move(new Vector3(0, moveDirection.y, 0) * Time.fixedDeltaTime);
         }
-        if(!holding && characterController.isGrounded)
-        characterController.Move(moveDirection * Time.fixedDeltaTime);
+        if (!holding && characterController.isGrounded)
+            characterController.Move(moveDirection * Time.fixedDeltaTime);
     }
 
     void Effects()
     {
         Volume vol = GameObject.Find("Volume").GetComponent<Volume>();
-        
+
         if (vol.profile.TryGet(out Vignette vignette2))
         {
             Vignette vignette = vignette2;
             vignette.intensity.Override(charge / 4f);
         }
-        
+
+    }
+    float magnitude = 0.0f;
+    bool shakeCam;
+    IEnumerator CameraShakeCheck()
+    {
+        GameObject cam = Camera.main.gameObject;
+        Vector3 originalPosition = cam.transform.localPosition;
+        while (shakeCam)
+        {
+            float strenght = magnitude;
+            cam.transform.localPosition = originalPosition + Random.insideUnitSphere * strenght;
+            yield return null;
+        }
+        cam.transform.localPosition = originalPosition;
+        yield return new WaitForSeconds(0.1f);
+        StartCoroutine(CameraShakeCheck());
     }
 }
