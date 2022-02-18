@@ -43,9 +43,14 @@ public class Character : MonoBehaviour
 
         StartCoroutine(CameraShakeCheck());
     }
-
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene
+                (UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
+
         Effects();
         grounded = characterController.isGrounded;
         Vector3 forward = transform.TransformDirection(Vector3.forward);
