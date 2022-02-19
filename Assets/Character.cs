@@ -43,7 +43,6 @@ public class Character : MonoBehaviour
 
         StartCoroutine(CameraShakeCheck());
     }
-
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
