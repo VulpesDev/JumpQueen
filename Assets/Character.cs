@@ -45,7 +45,7 @@ public class Character : MonoBehaviour
     }
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene
                 (UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
@@ -64,7 +64,7 @@ public class Character : MonoBehaviour
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+        if (Input.GetButtonDown("Jump") && canMove && characterController.isGrounded)
         {
             StartCoroutine(JumpCheck());
         }
@@ -86,7 +86,7 @@ public class Character : MonoBehaviour
     {
         holding = true;
         shakeCam = true;
-        if (Input.GetButtonUp("Jump"))
+        if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
             moveDirection.y = jumpSpeed * charge;
             holding = false;
@@ -94,11 +94,11 @@ public class Character : MonoBehaviour
             yield return new WaitUntil(() => characterController.isGrounded != true);
             StartCoroutine(PushForwards());
         }
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.001f);
         if (charge < maxCharge)
             charge += chargeRate;
-        if (charge < maxCharge / 3)
-            magnitude += chargeRate / 10;
+        if (magnitude < maxCharge / 4)
+            magnitude += chargeRate / 20;
         if (holding) StartCoroutine(JumpCheck());
     }
 
@@ -120,10 +120,10 @@ public class Character : MonoBehaviour
             if (magnitude < 0.0f) magnitude = 0.0f;
             yield return new WaitForSeconds(0.01f);
         }
-        
+
         while (charge > 0.0f)
         {
-            charge -= 0.4f;
+            charge -= 0.4f; if (charge < 0.0f) charge = 0.0f;
             yield return new WaitForSeconds(0.01f);
         }
     }
@@ -146,7 +146,7 @@ public class Character : MonoBehaviour
         if (vol.profile.TryGet(out Vignette vignette2))
         {
             Vignette vignette = vignette2;
-            vignette.intensity.Override(charge / 4f);
+            vignette.intensity.Override(charge / 3f);
         }
 
     }
