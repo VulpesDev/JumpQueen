@@ -9,7 +9,7 @@ using UnityEngine.Rendering.Universal;
 public class Character : MonoBehaviour
 {
     public float walkingSpeed = 7.5f;
-    public float runningSpeed = 11.5f;
+    public float runningSpeed = 7.5f;
     public float jumpSpeed = 8.0f;
     float charge = 0.0f;
     public float maxCharge = 3.0f;
@@ -82,6 +82,26 @@ public class Character : MonoBehaviour
         }
     }
 
+    bool bounced = false;
+    Vector3 wallDir;
+
+    private void OnControllerColliderHit(ControllerColliderHit col)
+    {
+        StartCoroutine(Bounce(col));
+    }
+    IEnumerator Bounce(ControllerColliderHit col)
+    {
+        yield return new WaitForEndOfFrame();
+        if (!characterController.isGrounded)
+        {
+            wallDir =
+            new Vector3(col.gameObject.transform.position.x - transform.position.x,
+            0, col.gameObject.transform.position.z - transform.position.z);
+            wallDir.Normalize();
+            bounced = true;
+        }
+    }
+
     IEnumerator JumpCheck()
     {
         holding = true;
@@ -107,10 +127,11 @@ public class Character : MonoBehaviour
         StartCoroutine(Cooldown());
         while (!characterController.isGrounded)
         {
-            characterController.Move(transform.TransformDirection(Vector3.forward)
+            characterController.Move( (bounced ? -wallDir : transform.TransformDirection(Vector3.forward))
                 * walkingSpeed * Time.fixedDeltaTime);
             yield return new WaitForFixedUpdate();
         }
+        bounced = false;
     }
     IEnumerator Cooldown()
     {
