@@ -1,0 +1,13 @@
+Problem: 
+V   Forward is Camera Forward NOT A PROBLEM FOR NOW
+V   Vignette lower A LOT DONE
+V   Jump automatically when maxed
+V   Decrease shake effect
+
+V    Bounce has to be dependent of the position of the wall  
+V    Terminate first bounce without reason
+Maybe lower the inverse y force when hitting his head
+
+Ideas:
+Never ending corridor with the breakfast in the end
+running breakfast

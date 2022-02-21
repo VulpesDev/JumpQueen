@@ -98,8 +98,8 @@ public class Character : MonoBehaviour
             new Vector3(col.point.x - transform.position.x,
             (col.point.y - transform.position.y), col.point.z - transform.position.z);
             wallDir.Normalize();
-            if(col.point.y > transform.position.y)
-            moveDirection.y *= -1;
+            if (col.point.y > transform.position.y)
+                moveDirection.y *= -.5f;
             bounced = true;
         }
     }
