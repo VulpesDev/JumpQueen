@@ -95,9 +95,11 @@ public class Character : MonoBehaviour
         if (!characterController.isGrounded)
         {
             wallDir =
-            new Vector3(col.gameObject.transform.position.x - transform.position.x,
-            0, col.gameObject.transform.position.z - transform.position.z);
+            new Vector3(col.point.x - transform.position.x,
+            (col.point.y - transform.position.y), col.point.z - transform.position.z);
             wallDir.Normalize();
+            if(col.point.y > transform.position.y)
+            moveDirection.y *= -1;
             bounced = true;
         }
     }
