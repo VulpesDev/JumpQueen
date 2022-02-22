@@ -20,7 +20,6 @@ public class TeleportPlayerToSpawn : MonoBehaviour
             player.transform.position = sPoint;
             player.GetComponent<CharacterController>().enabled = true;
             player.GetComponent<Character>().enabled = true;
-            Debug.Log("teleported");
         }
     }
 }

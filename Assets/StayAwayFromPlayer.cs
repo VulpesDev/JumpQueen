@@ -7,7 +7,8 @@ public class StayAwayFromPlayer : MonoBehaviour
     GameObject player;
     float dif;
     float ppos;
-    [SerializeField] float speed = 0.8f;
+    bool move = false;
+    [SerializeField] float speed = 0.8f, pdistanceMin = 1.0f, pdistanceMax = 10.0f, pdistance = 0f;
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -16,10 +17,16 @@ public class StayAwayFromPlayer : MonoBehaviour
     void FixedUpdate()
     {
         ppos = player.transform.position.z;
-        //transform.position = 
-        //    new Vector3(transform.position.x, transform.position.y, ppos + dif);
-        transform.position = Vector3.Lerp(transform.position,
+        pdistance = (transform.position - player.transform.position).magnitude;
+        if (pdistance <= pdistanceMin)
+            move = true;
+        else if (pdistance >= pdistanceMax)
+            move = false;
+        if (move)
+        {
+            transform.position = Vector3.Lerp(transform.position,
             new Vector3(transform.position.x, transform.position.y, ppos + dif),
-             speed * Time.fixedDeltaTime);
+             Mathf.Clamp(pdistance, 0, 1)* speed * Time.fixedDeltaTime);
+        }
     }
 }
