@@ -33,6 +33,7 @@ public class Character : MonoBehaviour
 
     void Start()
     {
+        //Application.targetFrameRate = 60;
         characterController = GetComponent<CharacterController>();
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -46,6 +47,7 @@ public class Character : MonoBehaviour
     void Update()
     {
         grounded = characterController.isGrounded;
+        if (grounded) bounced = false;
         if (Input.GetKeyDown(KeyCode.R))
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene
@@ -125,9 +127,9 @@ public class Character : MonoBehaviour
         }
         yield return new WaitForSeconds(0.001f);
         if (charge < maxCharge)
-            charge += chargeRate;
+            charge += chargeRate * Time.deltaTime;
         if (magnitude < maxCharge / 4)
-            magnitude += chargeRate / 20;
+            magnitude += chargeRate / 20 * Time.deltaTime;
         if (holding) StartCoroutine(JumpCheck());
     }
 
