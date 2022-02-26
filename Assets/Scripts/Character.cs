@@ -20,7 +20,7 @@ public class Character : MonoBehaviour
     public float lookSpeedBase;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
-    bool grounded;
+    public bool grounded;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -103,6 +103,7 @@ public class Character : MonoBehaviour
         yield return new WaitForEndOfFrame();
         if (!characterController.isGrounded)
         {
+            Sounds.PlaySound("Bounce", 1f);
             wallDir =
             new Vector3(col.point.x - transform.position.x,
             (col.point.y - transform.position.y), col.point.z - transform.position.z);
@@ -119,6 +120,7 @@ public class Character : MonoBehaviour
         shakeCam = true;
         if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
+            Sounds.PlaySound("Jump", 1f);
             moveDirection.y = Mathf.Clamp(jumpSpeed * charge, 0 , jumpSpeed);
             holding = false;
             shakeCam = false;
