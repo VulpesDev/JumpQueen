@@ -103,7 +103,7 @@ MonoBehaviour:
   runningSpeed: 7.5
   jumpSpeed: 14
   maxCharge: 1
-  chargeRate: 1
+  chargeRate: 1.1
   gravity: 20
   playerCamera: {fileID: 5689863437317347016}
   lookSpeedBase: 0
