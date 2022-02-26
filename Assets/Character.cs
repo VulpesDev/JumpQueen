@@ -80,6 +80,13 @@ public class Character : MonoBehaviour
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
+        if (!characterController.isGrounded)
+        {
+            moveDirection.y -= gravity * Time.deltaTime;
+            characterController.Move(new Vector3(0, moveDirection.y, 0) * Time.deltaTime);
+        }
+        if (!holding && characterController.isGrounded)
+            characterController.Move(moveDirection * Time.deltaTime);
     }
 
     bool bounced = false;
@@ -130,7 +137,7 @@ public class Character : MonoBehaviour
         while (!characterController.isGrounded)
         {
             characterController.Move( (bounced ? -wallDir : transform.TransformDirection(Vector3.forward))
-                * walkingSpeed * Time.fixedDeltaTime);
+                * walkingSpeed * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
         bounced = false;
@@ -149,17 +156,6 @@ public class Character : MonoBehaviour
             charge -= 0.4f; if (charge < 0.0f) charge = 0.0f;
             yield return new WaitForSeconds(0.01f);
         }
-    }
-
-    private void FixedUpdate()
-    {
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.fixedDeltaTime;
-            characterController.Move(new Vector3(0, moveDirection.y, 0) * Time.fixedDeltaTime);
-        }
-        if (!holding && characterController.isGrounded)
-            characterController.Move(moveDirection * Time.fixedDeltaTime);
     }
 
     void Effects()
