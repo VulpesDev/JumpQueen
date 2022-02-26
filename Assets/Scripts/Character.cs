@@ -119,6 +119,7 @@ public class Character : MonoBehaviour
         shakeCam = true;
         if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
+            Debug.Log(jumpSpeed * charge);
             moveDirection.y = jumpSpeed * charge;
             holding = false;
             shakeCam = false;
