@@ -7,8 +7,9 @@ V   Decrease shake effect
 V    Bounce has to be dependent of the position of the wall  
 V    Terminate first bounce without reason
 V    Maybe lower the inverse y force when hitting his head
-Sometimes inverse y force doesn't work as expected
+V    Sometimes inverse y force doesn't work as expected
+Optimize code (remove coroutines somehow)
 
 Ideas:
-Never ending corridor with the breakfast in the end
+V  Never ending corridor with the breakfast in the end
 running breakfast

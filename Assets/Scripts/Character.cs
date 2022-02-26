@@ -119,7 +119,7 @@ public class Character : MonoBehaviour
         shakeCam = true;
         if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
-            moveDirection.y = jumpSpeed * charge;
+            moveDirection.y = Mathf.Clamp(jumpSpeed * charge, 0 , jumpSpeed);
             holding = false;
             shakeCam = false;
             yield return new WaitUntil(() => characterController.isGrounded != true);
