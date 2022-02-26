@@ -4,9 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-[RequireComponent(typeof(CharacterController))]
-
-public class Character : MonoBehaviour
+public class CharacterRigid : MonoBehaviour
 {
     public float walkingSpeed = 7.5f;
     public float runningSpeed = 7.5f;
@@ -14,16 +12,17 @@ public class Character : MonoBehaviour
     float charge = 0.0f;
     public float maxCharge = 3.0f;
     public float chargeRate = 0.01f;
+    public float bounceModifier = 1;
     bool holding = false;
-    bool grounded;
-    public float gravity = 20.0f;
     public Camera playerCamera;
     public float lookSpeedBase;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
+    bool grounded;
 
-    CharacterController characterController;
-    Vector3 moveDirection = Vector3.zero;
+    Rigidbody rb;
+    PhysicMaterial mat;
+    bool bounce;
     float rotationX = 0;
 
     [HideInInspector]
@@ -33,7 +32,8 @@ public class Character : MonoBehaviour
 
     void Start()
     {
-        characterController = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+        mat = GetComponent<CapsuleCollider>().material;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -45,32 +45,26 @@ public class Character : MonoBehaviour
     }
     void Update()
     {
+        canMove = !holding;
         if (Input.GetKeyDown(KeyCode.R))
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene
                 (UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
-
         Effects();
-        grounded = characterController.isGrounded;
+
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed)
+        float curSpeedZ = canMove ? (isRunning ? runningSpeed : walkingSpeed)
             * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed)
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed)
             * Input.GetAxis("Horizontal") : 0;
-        float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (Input.GetButtonDown("Jump") && canMove && characterController.isGrounded)
+        if (Input.GetButtonDown("Jump") && canMove && isGrounded())
         {
             StartCoroutine(JumpCheck());
-        }
-        else
-        {
-            moveDirection.y = movementDirectionY;
         }
 
         if (canLook)
@@ -80,35 +74,23 @@ public class Character : MonoBehaviour
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
-        if (!characterController.isGrounded)
+
+        Vector3 move = transform.right * curSpeedX + transform.forward * curSpeedZ;
+        if (!holding && isGrounded())
+            rb.velocity = move  * Time.deltaTime;
+        if(!isGrounded())
         {
-            moveDirection.y -= gravity * Time.deltaTime;
-            characterController.Move(new Vector3(0, moveDirection.y, 0) * Time.deltaTime);
+            mat.bounciness = bounceModifier;
         }
-        if (!holding && characterController.isGrounded)
-            characterController.Move(moveDirection * Time.deltaTime);
+        else
+        {
+            mat.bounciness = 0;
+        }
     }
 
-    bool bounced = false;
-    Vector3 wallDir;
-
-    private void OnControllerColliderHit(ControllerColliderHit col)
+    private void OnCollisionEnter(Collision collision)
     {
-        StartCoroutine(Bounce(col));
-    }
-    IEnumerator Bounce(ControllerColliderHit col)
-    {
-        yield return new WaitForEndOfFrame();
-        if (!characterController.isGrounded)
-        {
-            wallDir =
-            new Vector3(col.point.x - transform.position.x,
-            (col.point.y - transform.position.y), col.point.z - transform.position.z);
-            wallDir.Normalize();
-            if (col.point.y > transform.position.y)
-                moveDirection.y *= -.5f;
-            bounced = true;
-        }
+        bounce = isGrounded() ? false : true;
     }
 
     IEnumerator JumpCheck()
@@ -117,10 +99,10 @@ public class Character : MonoBehaviour
         shakeCam = true;
         if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
-            moveDirection.y = jumpSpeed * charge;
+            rb.AddForce(new Vector3(0, jumpSpeed * charge, 0), ForceMode.Impulse);
             holding = false;
             shakeCam = false;
-            yield return new WaitUntil(() => characterController.isGrounded != true);
+            yield return new WaitUntil(() => isGrounded() != true);
             StartCoroutine(PushForwards());
         }
         yield return new WaitForSeconds(0.001f);
@@ -134,13 +116,12 @@ public class Character : MonoBehaviour
     IEnumerator PushForwards()
     {
         StartCoroutine(Cooldown());
-        while (!characterController.isGrounded)
+        while (!isGrounded() && !bounce)
         {
-            characterController.Move( (bounced ? -wallDir : transform.TransformDirection(Vector3.forward))
-                * walkingSpeed * Time.deltaTime);
-            yield return new WaitForFixedUpdate();
+            rb.velocity = new Vector3(transform.forward.x * walkingSpeed * Time.deltaTime, rb.velocity.y,
+                transform.forward.z * walkingSpeed * Time.deltaTime) ;
+            yield return new WaitForEndOfFrame();
         }
-        bounced = false;
     }
     IEnumerator Cooldown()
     {
@@ -184,5 +165,10 @@ public class Character : MonoBehaviour
         cam.transform.localPosition = originalPosition;
         yield return new WaitForSeconds(0.1f);
         StartCoroutine(CameraShakeCheck());
+    }
+
+    bool isGrounded()
+    {
+        return Physics.Raycast(transform.position, -Vector3.up, GetComponent<Collider>().bounds.extents.y + 0.01f);
     }
 }
