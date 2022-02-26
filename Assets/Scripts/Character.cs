@@ -120,7 +120,7 @@ public class Character : MonoBehaviour
         shakeCam = true;
         if (Input.GetButtonUp("Jump") || charge >= maxCharge)
         {
-            Sounds.PlaySound("Jump", 1f);
+            Sounds.PlaySound("Jump", 0.5f);
             moveDirection.y = Mathf.Clamp(jumpSpeed * charge, 0 , jumpSpeed);
             holding = false;
             shakeCam = false;
